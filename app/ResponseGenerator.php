@@ -28,7 +28,7 @@ class ResponseGenerator
         } catch (ParserException $exception) {
             echo $exception->getXml();
         } catch (\Throwable $exception) {
-            
+
         }
     }
 
