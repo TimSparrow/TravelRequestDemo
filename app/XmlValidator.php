@@ -1,7 +1,6 @@
 <?php
 
 // use Dom\XPath; - not available before PHP 8.4
-use DOMXPath;
 use Exceptions\ParserException;
 
 /**
@@ -39,13 +38,16 @@ class XmlValidator
      * an autowiring mechanism (Laravel/Symfony),
      * $document and $xpath are left open for injection for unit tests/mocking
      */
-    public function __construct(string $xml,
-    ?DomDocument $document = null,
-    ?DOMXPath $xpath = null)
+    public function __construct(?DomDocument $document=null, ?DOMXPath $xpath=null)
     {
-
         $this->document = $document ?? new DOMDocument();
         $this->xpath = $xpath ?? new DOMXPath($this->document);
+    }
+
+
+    public function setXml(string $xml): void
+    {
+
         if (false === $this->document->loadXML($xml, self::XML_LOAD_OPTIONS))
         {
             throw new ParserException("Not well-formed XML, or XML DTD validation failed ");
@@ -109,24 +111,24 @@ class XmlValidator
         if ($nodes->length == 0) {
             throw new ParserException("Missing required parameters");
         }
-        $credentials = $nodes->item(0)->attributes;
-        $username = $credentials->getNamedItem("username");
+        $credentials = $nodes->item(0);
+        $username = $credentials->getAttribute("username");
         if (empty($username)) {
             throw new ParserException("Username is missing or empty");
         }
 
-        $password = $credentials->getNamedItem("password");
+        $password = $credentials->getAttribute("password");
         if (empty($password)) {
             throw new ParserException("Username is missing or empty");
         }
 
-        $companyId = $credentials->getNamedItem("CompanyID");
+        $companyId = $credentials->getAttribute("CompanyID");
 
         if (empty($companyId) || !is_numeric($companyId)) {
             throw new ParserException("Company ID is missing, empty or non-numeric");
         }
         // the constructor here may have additional domain specific checks. such as account validation
-        return new Credentials($username, $password, (int)$companyId);
+        return new Credentials($username, $password, (int)($companyId));
     }
 
     private function getValidatedSearchType(): bool
@@ -331,7 +333,7 @@ class XmlValidator
 
     private function getMaxChildrenPerRoom(): int
     {
-        return $this->getNumericValueFromXml('/AllowedChildCountPerRoom', 'allowed children per room');;
+        return $this->getNumericValueFromXml('/AllowedChildCountPerRoom', 'allowed children per room');
     }
 
     private function getValidatedMarkup(): float

@@ -6,21 +6,21 @@ use Services\ExchangeRateInterface;
 
 class ResponseGenerator
 {
-    private XmlValidator $xmlConverter;
 
     public function __construct(
         private readonly ExchangeRateInterface $exchange,   // real life currency exchange API
         private readonly Faker $faker,                    // to generate random data
+        private readonly XmlValidator $xmlConverter,
     ) {}
 
 
-    public function execute(): void
+    public function execute(string $varOcg): void
     {
         // sample data is provided as an example,
         // proper handling would be through inheriting Symfony\Command, etc.
         try {
-            $_POST = file_get_contents('./sample.xml');
-            $varOcg = $_POST; // this duplication is for handshake only
+
+
             $this->importAndValidateXml($varOcg);
             $result = $this->generate($this->xmlConverter->getDestinations(), $this->xmlConverter->getMarkup(), $this->xmlConverter->getCurrency());
 
@@ -34,7 +34,7 @@ class ResponseGenerator
 
     private function importAndValidateXml(string $xml): void
     {
-        $this->xmlConverter = new XmlValidator($xml);
+        $this->xmlConverter->setXml($xml);
         $this->xmlConverter->validate();
     }
 
